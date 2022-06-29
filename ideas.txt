@@ -1,0 +1,168 @@
+ 
+my implementation of huffman coding
+
+    FCD
+   _|___
+  |     \
+ /``\   |
+ C1,D2,F3,E4,G5,H6,I7,J8,
+
+
+ This is not a good implementation of huffman coding but it has its base idea
+ this is not optimized as all nodes are shoved to the right, so if there is a wide variety of chars, we'll have some massive binary codes per character
+
+     CD
+    /  \
+   C    D
+
+     FCD
+     /   \
+    F    CD
+        /  \
+       C    D
+
+     EFCD
+    /    \
+   E      FCD
+         /   \
+        F     CD
+             /  \
+            C    D
+
+     GEFCD
+    /     \
+   G       EFCD
+          /    \
+         E     FCD
+              /   \
+             F     CD
+                  /  \
+                 C    D
+
+     HGEFCD
+    /      \
+   H        GEFCD
+           /     \
+          G       EFCD
+                 /    \
+                E      FCD
+                      /   \
+                     F     CD
+                          /  \
+                         C    D
+
+     IHGEFCD
+    /       \
+   I         HGEFCD
+            /      \
+           H       GEFCD
+                  /     \
+                 G       EFCD
+                        /    \
+                       E     FCD
+                            /   \
+                           F     CD
+                                /  \
+                               C    D
+     JIHGEFCD
+   0/        \1
+   J          IHGEFCD
+            0/       \1
+            I         HGEFCD
+                    0/      \1
+                    H        GEFCD
+                           0/     \1
+                           G       EFCD
+                                 0/    \1
+                                 E      FCD
+                                      0/   \1
+                                      F     CD
+                                          0/  \1
+                                          C    D
+
+                                          as you can see, C is now  1111110, thats 7 bits, which means when making these binary codes, the char that occurs the lowest will have a binary code spanning n-1 bits, n being the amount of different chars, so if i have a message with 32 letters of unicode text, with just one "D" in it, the binary code for D will be 31 bits, meaning we have a negative compression ratio (whops)
+
+                                          one day i'll rewrite this using min-heap nodes so that it can be a proper huffman tree, but for now this is the garbage i'll be feeding you :thumbs_up:
+
+
+IDEA:
+C1,D2,F3
+
+Tree One
+we do not need to store the frequency in the tree as we wont be using it any further, we only needed the frequencies for sorting it lowest->highest
+
+
+struct tree {
+    char chr;
+    tree *left,*right, *parentNode;
+}
+
+
+
+pseudocode ---
+
+begin loop : increments[i]; while i smaller than or equal to size of list
+tree prevTree;
+if i is 0:
+    tree e;
+    e.left = list[i]
+    e.right = list[i+1]
+    i+=2
+    prevTree=e;
+else:
+    tree node;
+    node.right = reference to prevTree;
+    node.left = list[i]
+    i++
+    node = prevTree;
+
+
+
+     CD
+    /  \
+   C    D
+
+
+
+   CD
+  /  \
+ C    D
+    make a new tree - z
+    z-left = next char in sorted list
+    z-right = previous tree
+
+ ------------
+ hello
+
+ h-1 e-1 o-1 l-2
+
+
+   EH
+  /  \
+ E    H
+
+   OHE
+  /   \
+ O     HE
+      /  \
+     E    H
+
+   LOHE
+ 0/    \1
+ L     OHE
+     0/   \1
+     O     HE
+         0/  \1
+         E    H
+
+    L=0
+    O=10
+    H=111
+    E=110
+
+    L = node->left
+    O = node->right->left
+    H = node->right->right->left
+
+
+    since its all shoved to the right node, there will be a lot of '1's in the compressed output
